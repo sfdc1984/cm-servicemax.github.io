@@ -31,8 +31,9 @@
             color: var(--text-main);
             display: flex;
             flex-direction: column;
-            height: 100vh;
-            overflow: hidden;
+            min-height: 100vh;
+            overflow-x: hidden;
+            overflow-y: auto;
         }
 
         /* Top Dash Header / Metrics */
@@ -70,10 +71,9 @@
 
         /* Workspace Wrapper */
         .map-container {
-            flex: 1;
             position: relative;
             width: 100%;
-            height: 100%;
+            height: 600px;
         }
 
         #map {
