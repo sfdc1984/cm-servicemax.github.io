@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Global Training Footprint Map</title>
+    
+    <!-- Leaflet Map Framework CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css" />
+    
+    <style>
+        :root {
+            --bg-primary: #0b0f19;
+            --bg-card: #131a26;
+            --accent-amber: #f59e0b;
+            --accent-blue: #3b82f6;
+            --text-main: #f3f4f6;
+            --text-muted: #9ca3af;
+            --border-color: #1e293b;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-main);
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Top Dash Header / Metrics */
+        .dashboard-header {
+            background-color: var(--bg-card);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem 1.5rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 1rem;
+            z-index: 10;
+        }
+
+        .metric-card {
+            background-color: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 0.75rem;
+            text-align: center;
+        }
+
+        .metric-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--accent-amber);
+            margin-bottom: 0.25rem;
+        }
+
+        .metric-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+        }
+
+        /* Workspace Wrapper */
+        .map-container {
+            flex: 1;
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+
+        #map {
+            width: 100%;
+            height: 100%;
+            background-color: var(--bg-primary);
+        }
+
+        /* Floating Region Filters */
+        .region-panel {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            z-index: 1000;
+            background-color: rgba(19, 26, 38, 0.9);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 0.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.35rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+        }
+
+        .filter-btn {
+            background: none;
+            border: 1px solid transparent;
+            color: var(--text-main);
+            padding: 0.5rem 1rem;
+            font-size: 0.85rem;
+            border-radius: 4px;
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.2s ease;
+        }
+
+        .filter-btn:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .filter-btn.active {
+            background-color: var(--accent-blue);
+            color: #ffffff;
+            border-color: var(--accent-blue);
+        }
+
+        /* Bottom Timeline Navigation */
+        .timeline-container {
+            position: absolute;
+            bottom: 1.5rem;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+            background-color: rgba(19, 26, 38, 0.95);
+            border: 1px solid var(--border-color);
+            border-radius: 30px;
+            padding: 0.4rem;
+            display: flex;
+            gap: 0.25rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(6px);
+        }
+
+        .timeline-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            padding: 0.5rem 1rem;
+            font-size: 0.85rem;
+            font-weight: 500;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .timeline-btn:hover {
+            color: var(--text-main);
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .timeline-btn.active {
+            background-color: var(--accent-amber);
+            color: var(--bg-primary);
+            font-weight: 700;
+        }
+
+        /* Tooltip Customizations Styling */
+        .leaflet-popup-content-wrapper {
+            background-color: var(--bg-card) !important;
+            color: var(--text-main) !important;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 0.85rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+        }
+        
+        .leaflet-popup-tip {
+            background-color: var(--bg-card) !important;
+        }
+
+        .popup-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #ffffff;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0.25rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .popup-row {
+            margin-bottom: 0.25rem;
+        }
+
+        .popup-label {
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Top Counter Banner Metrics -->
+    <header class="dashboard-header">
+        <div class="metric-card">
+            <div class="metric-value" id="count-deliveries">0</div>
+            <div class="metric-label">Deliveries Tracked</div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-value" id="count-participants">0</div>
+            <div class="metric-label">Participants</div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-value" id="count-cities">0</div>
+            <div class="metric-label">Active Cities</div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-value" id="count-countries">0</div>
+            <div class="metric-label">Countries</div>
+        </div>
+    </header>
+
+    <!-- Map Stage Container -->
+    <main class="map-container">
+        <div id="map"></div>
+
+        <!-- Floating Region Controls -->
+        <div class="region-panel">
+            <button class="filter-btn active" onclick="setRegion('All')">All Regions</button>
+            <button class="filter-btn" onclick="setRegion('India')">India Focus</button>
+            <button class="filter-btn" onclick="setRegion('USA')">USA Focus</button>
+            <button class="filter-btn" onclick="setRegion('Europe & AUS')">Europe & AUS</button>
+        </div>
+
+        <!-- Dynamic Timeline Selection Row -->
+        <div class="timeline-container">
+            <button class="timeline-btn active" onclick="setYear('All')">All Years</button>
+            <button class="timeline-btn" onclick="setYear('2020')">2020</button>
+            <button class="timeline-btn" onclick="setYear('2021')">2021</button>
+            <button class="timeline-btn" onclick="setYear('2022')">2022</button>
+            <button class="timeline-btn" onclick="setYear('2023')">2023</button>
+            <button class="timeline-btn" onclick="setYear('2024')">2024</button>
+            <button class="timeline-btn" onclick="setYear('2025')">2025</button>
+            <button class="timeline-btn" onclick="setYear('2026')">2026</button>
+        </div>
+    </main>
+
+    <!-- Map Script Engine Dependencies -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+    <script>
+        // Master Dataset Initialization Block
+        const rawData = [
+          {year:2020, country:"India", region:"Karnataka", city:"Bangalore", company:"ServiceMax", lat:12.9716, lng:77.5946, trainees:1},
+          {year:2020, country:"India", region:"Karnataka", city:"Bangalore", company:"ServiceMax", lat:12.9716, lng:77.5946, trainees:41},
+          {year:2020, country:"India", region:"Tamil Nadu", city:"Chennai", lat:13.0827, lng:80.2707, company:"ServiceMax", trainees:1},
+          {year:2020, country:"USA", region:"Colorado", city:"Denver", lat:39.7645, lng:-105.1353, company:"ServiceMax", trainees:1},
+          {year:2020, country:"USA", region:"California", city:"San Diego", lat:32.8248, lng:-117.3892, company:"ServiceMax", trainees:1},
+          {year:2021, country:"India", region:"Karnataka", city:"Bangalore", lat:12.9716, lng:77.5946, company:"Cognizant", trainees:21},
+          {year:2021, country:"India", region:"Telangana", city:"Hyderabad", lat:17.3850, lng:78.4867, company:"Cognizant", trainees:3},
+          {year:2021, country:"India", region:"West Bengal", city:"Kolkata", lat:22.6764, lng:88.0495, company:"Cognizant", trainees:4},
+          {year:2021, country:"India", region:"Uttar Pradesh", city:"Noida", lat:28.5170, lng:77.2611, company:"Cognizant", trainees:2},
+          {year:2021, country:"India", region:"Maharashtra", city:"Pune", lat:18.5249, lng:73.7229, company:"Cognizant", trainees:6},
+          {year:2021, country:"Netherlands", region:"UT", city:"Netherlands (Hq)", lat:52.1951, lng:3.0361, company:"Cognizant", trainees:2},
+          {year:2021, country:"USA", region:"California", city:"Fullerton", lat:33.8895, lng:-117.9596, company:"Cognizant", trainees:2},
+          {year:2022, country:"Australia", region:"NSW", city:"Sydney", lat:-33.8472, lng:150.6023, company:"ServiceMax", trainees:2},
+          {year:2022, country:"China", region:"Shanghai", city:"Shanghai", lat:31.2304, lng:121.4737, company:"PTC", trainees:8},
+          {year:2022, country:"China", region:"Guangdong", city:"Shenzhen", lat:22.5431, lng:114.0579, company:"PTC", trainees:2},
+          {year:2022, country:"India", region:"Karnataka", city:"Bangalore", lat:12.9716, lng:77.5946, company:"Accenture", trainees:6},
+          {year:2022, country:"India", region:"Karnataka", city:"Bangalore", lat:12.9716, lng:77.5946, company:"GE", trainees:1},
+          {year:2022, country:"India", region:"Karnataka", city:"Bangalore", lat:12.9716, lng:77.5946, company:"GE Digital Hub", trainees:1},
+          {year:2022, country:"India", region:"Karnataka", city:"Bangalore", lat:12.9716, lng:77.5946, company:"GE Healthcare", trainees:3},
+          {year:2022, country:"India", region:"Karnataka", city:"Bangalore", lat:12.9716, lng:77.5946, company:"GEHC", trainees:1},
+          {year:2022, country:"India", region:"Karnataka", city:"Bangalore", lat:12.9716, lng:77.5946, company:"Infosys", trainees:32},
+          {year:2022, country:"India", region:"Karnataka", city:"Bangalore", lat:12.9716, lng:77.5946, company:"JCI", trainees:1},
+          {year:2022, country:"India", region:"Karnataka", city:"Bangalore", lat:12.9716, lng:77.5946, company:"Medtronic", trainees:2},
+          {year:2022, country:"India", region:"Karnataka", city:"Bangalore", lat:12.9716, lng:77.5946, company:"Merck Group", trainees:2},
+          {year:2022, country:"India", region:"Karnataka", city:"Bangalore", lat:12.9716, lng:77.5946, company:"PTC", trainees:3},
+          {year:2022, country:"India", region:"Karnataka", city:"Bangalore", lat:12.9716, lng:77.5946, company:"Philips", trainees:2},
+          {year:2022, country:"India", region:"Karnataka", city:"Bangalore", lat:12.9716, lng:77.5946, company:"ServiceMax", trainees:8},
+          {year:2022, country:"India", region:"Karnataka", city:"Bangalore", lat:12.9716, lng:77.5946, company:"Solventum", trainees:1},
+          {year:2022, country:"India", region:"Karnataka", city:"Bangalore", lat:12.9716, lng:77.5946, company:"TechnipFMC", trainees:1},
+          {year:2022, country:"India", region:"Karnataka", city:"Bangalore", lat:12.9716, lng:77.5946, company:"Vyaire", trainees:1},
+          {year:2022, country:"India", region:"Karnataka", city:"Bangalore", lat:12.9716, lng:77.5946, company:"Wipro", trainees:1},
+          {year:2022, country:"India", region:"Bihar", city:"Bhagalpur", lat:25.3478, lng:86.9824, company:"Infosys", trainees:1},
+          {year:2022, country:"India", region:"Madhya Pradesh", city:"Bhopal", lat:23.2599, lng:77.4126, company:"Infosys", trainees:1},
+          {year:2022, country:"India", region:"Chandigarh", city:"Chandigarh", lat:30.7333, lng:76.7794, company:"Infosys", trainees:1},
+          {year:2022, country:"India", region:"Tamil Nadu", city:"Chennai", lat:13.0827, lng:80.2707, company:"Infosys", trainees:3},
+          {year:2022, country:"India", region:"Delhi", city:"Delhi", lat:28.6139, lng:77.2090, company:"Horiba", trainees:10},
+          {year:2022, country:"India", region:"Telangana", city:"Hyderabad", lat:17.3850, lng:78.4867, company:"Accenture", trainees:1},
+          {year:2022, country:"India", region:"Telangana", city:"Hyderabad", lat:17.3850, lng:78.4867, company:"Infosys", trainees:4},
+          {year:2022, country:"India", region:"Telangana", city:"Hyderabad", lat:17.3850, lng:78.4867, company:"Wipro", trainees:9},
+          {year:2022, country:"India", region:"West Bengal", city:"Kolkata", lat:22.6764, lng:88.0495, company:"Accenture", trainees:5},
+          {year:2022, country:"India", region:"Maharashtra", city:"Pune", lat:18.5249, lng:73.7229, company:"Accenture", trainees:2},
+          {year:2022, country:"India", region:"Maharashtra", city:"Pune", lat:18.5249, lng:73.7229, company:"GE Healthcare", trainees:1},
+          {year:2022, country:"India", region:"Maharashtra", city:"Pune", lat:18.5249, lng:73.7229, company:"Infosys", trainees:3},
+          {year:2022, country:"Romania", region:"Bucharest", city:"Bucharest", lat:44.4380, lng:25.9298, company:"SIG", trainees:1},
+          {year:2022, country:"Romania", region:"Cluj", city:"Cluj-Napoca", lat:46.7712, lng:23.6236, company:"SIG", trainees:1},
+          {year:2022, country:"Spain", region:"Catalonia", city:"Barcelona", lat:41.3928, lng:2.0578, company:"Schneider Electric", trainees:2},
+          {year:2022, country:"Sweden", region:"Stockholm", city:"Stockholm", lat:59.3579, lng:17.4384, company:"Mycronic", trainees:1},
+          {year:2022, country:"Sweden", region:"Stockholm", city:"Stockholm", lat:59.3579, lng:17.4384, company:"Veolia Sweden", trainees:1},
+          {year:2022, country:"UK", region:"Cambridgeshire", city:"Cambridgeshire", lat:52.3719, lng:-0.6521, company:"Domino", trainees:2},
+          {year:2022, country:"UK", region:"London", city:"London", lat:51.5287, lng:-0.3241, company:"LivaNova", trainees:1},
+          {year:2022, country:"UK", region:"London", city:"London", lat:51.5287, lng:-0.3241, company:"Molecular Devices", trainees:1},
+          {year:2022, country:"USA", region:"Maryland", city:"Baltimore", lat:39.2848, lng:-76.7029, company:"ServiceMax", trainees:1},
+          {year:2022, country:"USA", region:"Illinois", city:"Chicago", lat:41.8781, lng:-87.6298, company:"MetraRR", trainees:1},
+          {year:2022, country:"USA", region:"Florida", city:"Clearwater", lat:27.9926, lng:-82.8038, company:"Philips", trainees:1},
+          {year:2022, country:"USA", region:"Texas", city:"Houston", lat:29.7604, lng:-95.3698, company:"ServiceMax", trainees:7},
+          {year:2022, country:"USA", region:"Nevada", city:"Las Vegas", lat:36.1699, lng:-115.1398, company:"Everi", trainees:1},
+          {year:2022, country:"USA", region:"Nevada", city:"Las Vegas", lat:36.1699, lng:-115.1398, company:"Light & Wonder", trainees:3},
+          {year:2022, country:"USA", region:"New Jersey", city:"Maple Shade", lat:39.9531, lng:-74.9941, company:"Eastern Lift Truck", trainees:1},
+          {year:2022, country:"USA", region:"Illinois", city:"Mettawa", lat:42.2697, lng:-87.9284, company:"Vyaire Medical", trainees:3},
+          {year:2022, country:"USA", region:"Minnesota", city:"Minneapolis", lat:44.9706, lng:-93.3440, company:"ServiceMax", trainees:1},
+          {year:2022, country:"USA", region:"Mississippi", city:"Mississippi", lat:32.5450, lng:-74.4057, company:"FedEx", trainees:1},
+          {year:2022, country:"USA", region:"California", city:"Pleasanton", lat:37.6624, lng:-121.8747, company:"ServiceMax", trainees:8},
+          {year:2022, country:"USA", region:"New Hampshire", city:"Portsmouth", lat:43.0718, lng:-70.7626, company:"Analogic", trainees:1},
+          {year:2022, country:"USA", region:"New Jersey", city:"Rahway", lat:40.6076, lng:-74.2776, company:"Merck Group", trainees:1},
+          {year:2022, country:"USA", region:"California", city:"San Jose", lat:37.2963, lng:-121.9806, company:"ServiceMax", trainees:2},
+          {year:2022, country:"USA", region:"Arizona", city:"Tucson", lat:32.2576, lng:-111.0962, company:"American Express", trainees:1},
+          {year:2022, country:"USA", region:"Kansas", city:"Wamego", lat:39.2030, lng:-96.3025, company:"HMT Tank", trainees:1},
+          {year:2022, country:"USA", region:"Massachusetts", city:"Wayland", lat:42.3606, lng:-71.3617, company:"Candela Medical", trainees:1},
+          {year:2022, country:"USA", region:"Indiana", city:"Zionsville", lat:39.9509, lng:-86.2661, company:"dormakaba", trainees:1},
+          {year:2023, country:"Australia", region:"Victoria", city:"Melbourne", lat:-37.9696, lng:144.3937, company:"TechForce", trainees:1},
+          {year:2023, country:"Australia", region:"NSW", city:"Sydney", lat:-33.8472, lng:150.6023, company:"TechForce", trainees:1},
+          {year:2023, country:"India", region:"Karnataka", city:"Bangalore", lat:12.9716, lng:77.5946, company:"Alcon", trainees:7},
+          {year:2023, country:"India", region:"Karnataka", city:"Bangalore", lat:12.9716, lng:77.5946, company:"Johnson Controls", trainees:1},
+          {year:2023, country:"India", region:"Karnataka", city:"Bangalore", lat:12.9716, lng:77.5946, company:"Schneider Electric", trainees:2},
+          {year:2023, country:"India", region:"Karnataka", city:"Bangalore", lat:12.9716, lng:77.5946, company:"ServiceMax", trainees:1},
+          {year:2023, country:"India", region:"Karnataka", city:"Bangalore", lat:12.9716, lng:77.5946, company:"Vyaire Medical", trainees:1},
+          {year:2023, country:"India", region:"Telangana", city:"Hyderabad", lat:17.3850, lng:78.4867, company:"TechForce", trainees:1},
+          {year:2023, country:"India", region:"Telangana", city:"Hyderabad", lat:17.3850, lng:78.4867, company:"Vyaire Medical", trainees:1},
+          {year:2023, country:"India", region:"Maharashtra", city:"Pune", lat:18.5249, lng:73.7229, company:"Johnson Controls India", trainees:1},
+          {year:2023, country:"India", region:"Kerala", city:"Thrissur", lat:10.5115, lng:76.1408, company:"TechForce", trainees:1},
+          {year:2023, country:"UK", region:"Cambridgeshire", city:"Bar Hill", lat:52.2495, lng:0.0140, company:"Domino", trainees:1},
+          {year:2023, country:"USA", region:"Massachusetts", city:"Boston", lat:42.3601, lng:-71.0589, company:"PTC", trainees:2},
+          {year:2023, country:"USA", region:"Illinois", city:"Chicago", lat:41.8781, lng:-87.6298, company:"Metra RR", trainees:1},
+          {year:2023, country:"USA", region:"Texas", city:"Houston", lat:29.7604, lng:-95.3698, company:"LivaNova", trainees:1},
+          {year:2023, country:"USA", region:"Nevada", city:"Las Vegas", lat:36.1699, lng:-115.1398, company:"Light & Wonder", trainees:1},
+          {year:2023, country:"USA", region:"Tennessee", city:"Memphis", lat:35.1495, lng:-90.0490, company:"FedEx", trainees:1},
+          {year:2023, country:"USA", region:"California", city:"Pleasanton", lat:37.6624, lng:-121.8747, company:"ServiceMax", trainees:7},
+          {year:2023, country:"USA", region:"New Hampshire", city:"Portsmouth", lat:43.0718, lng:-70.7626, company:"Analogic", trainees:1},
+          {year:2024, country:"India", region:"Karnataka", city:"Bangalore", lat:12.9716, lng:77.5946, company:"Alcon", trainees:2},
+          {year:2024, country:"India", region:"Karnataka", city:"Bangalore", lat:12.9716, lng:77.5946, company:"IT Shoulders", trainees:1},
+          {year:2024, country:"India", region:"Karnataka", city:"Bangalore", lat:12.9716, lng:77.5946, company:"PTC", trainees:7},
+          {year:2024, country:"India", region:"Karnataka", city:"Bangalore", lat:12.9716, lng:77.5946, company:"ServiceMax", trainees:2},
+          {year:2024, country:"India", region:"Karnataka", city:"Bangalore", lat:12.9716, lng:77.5946, company:"Solventum", trainees:1},
+          {year:2024, country:"India", region:"Telangana", city:"Hyderabad", lat:17.3850, lng:78.4867, company:"Medtronic", trainees:1},
+          {year:2024, country:"India", region:"Telangana", city:"Hyderabad", lat:17.3850, lng:78.4867, company:"TechnipFMC", trainees:1},
+          {year:2024, country:"Romania", region:"Cluj", city:"Cluj-Napoca", lat:46.7712, lng:23.6236, company:"SIG", trainees:2},
+          {year:2024, country:"UK", region:"Cambridgeshire", city:"Bar Hill", lat:52.2495, lng:0.0140, company:"Domino", trainees:1},
+          {year:2024, country:"USA", region:"Massachusetts", city:"Boston", lat:42.3601, lng:-71.0589, company:"PTC", trainees:5},
+          {year:2024, country:"USA", region:"California", city:"Brea", lat:33.9167, lng:-117.9000, company:"Beckman Coulter", trainees:2},
+          {year:2024, country:"USA", region:"Illinois", city:"Chicago", lat:41.8781, lng:-87.6298, company:"Metra RR", trainees:1},
+          {year:2024, country:"USA", region:"California", city:"Hawthorne", lat:33.9164, lng:-118.3526, company:"Rapiscan Systems", trainees:2},
+          {year:2024, country:"USA", region:"Wisconsin", city:"Milwaukee", lat:43.0389, lng:-87.9065, company:"Rockwell Automation", trainees:3},
+          {year:2024, country:"USA", region:"Pennsylvania", city:"Pittsburgh", lat:40.4406, lng:-79.9959, company:"Wabtec", trainees:2},
+          {year:2024, country:"USA", region:"California", city:"Pleasanton", lat:37.6624, lng:-121.8747, company:"ServiceMax", trainees:1},
+          {year:2024, country:"USA", region:"Massachusetts", city:"Wilmington", lat:42.5453, lng:-71.1636, company:"CRL", trainees:1},
+          {year:2024, country:"USA", region:"California", city:"Woodland Hills", lat:34.1684, lng:-118.6059, company:"WASH Laundry", trainees:2},
+          {year:2025, country:"India", region:"Karnataka", city:"Bangalore", lat:12.9716, lng:77.5946, company:"Accenture", trainees:3},
+          {year:2025, country:"India", region:"Karnataka", city:"Bangalore", lat:12.9716, lng:77.5946, company:"Alcon", trainees:5},
+          {year:2025, country:"India", region:"Karnataka", city:"Bangalore", lat:12.9716, lng:77.5946, company:"Johnson Controls", trainees:2},
+          {year:2025, country:"India", region:"Karnataka", city:"Bangalore", lat:12.9716, lng:77.5946, company:"PTC", trainees:2},
+          {year:2025, country:"India", region:"Karnataka", city:"Bangalore", lat:12.9716, lng:77.5946, company:"WASH Laundry", trainees:2},
+          {year:2025, country:"India", region:"Telangana", city:"Hyderabad", lat:17.3850, lng:78.4867, company:"Carrier", trainees:1},
+          {year:2025, country:"India", region:"Telangana", city:"Hyderabad", lat:17.3850, lng:78.4867, company:"Illumina", trainees:2},
+          {year:2025, country:"India", region:"Telangana", city:"Hyderabad", lat:17.3850, lng:78.4867, company:"Pitney Bowes", trainees:1},
+          {year:2025, country:"USA", region:"Texas", city:"Fort Worth", lat:32.7555, lng:-97.3308, company:"Alcon", trainees:1},
+          {year:2025, country:"USA", region:"California", city:"Hawthorne", lat:33.9164, lng:-118.3526, company:"Rapiscan Systems", trainees:1},
+          {year:2025, country:"USA", region:"Michigan", city:"Kalamazoo", lat:42.2917, lng:-85.5872, company:"Stryker", trainees:1},
+          {year:2025, country:"USA", region:"Massachusetts", city:"Marlborough", lat:42.3487, lng:-71.5523, company:"Boston Scientific", trainees:2},
+          {year:2025, country:"USA", region:"Wisconsin", city:"Milwaukee", lat:43.0389, lng:-87.9065, company:"Johnson Controls", trainees:1},
+          {year:2025, country:"USA", region:"New York", city:"New York", lat:40.7128, lng:-74.0060, company:"Accenture", trainees:1},
+          {year:2025, country:"USA", region:"Florida", city:"Palm Beach Gardens", lat:26.8338, lng:-80.1225, company:"Carrier", trainees:3},
+          {year:2025, country:"USA", region:"Massachusetts", city:"Waltham", lat:42.3765, lng:-71.2356, company:"Thermo Fisher Scientific", trainees:1}
+        ];
+
+        let activeYear = 'All';
+        let activeRegion = 'All';
+        let map;
+        let markersGroup;
+
+        // Initialize Map
+        function initMap() {
+            map = L.map('map', {
+                zoomControl: false,
+                attributionControl: false
+            }).setView([20, 10], 2);
+
+            // Using CartoDB Dark Matter base tile layout
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+                maxZoom: 18
+            }).addTo(map);
+
+            markersGroup = L.layerGroup().addTo(map);
+            renderDashboard();
+        }
+
+        // Filter and Render Logic Engines
+        function renderDashboard() {
+            markersGroup.clearLayers();
+
+            let totalDeliveries = 0;
+            let totalParticipants = 0;
+            let countriesSet = new Set();
+            let citiesSet = new Set();
+
+            // City Aggregator Object Structure
+            const consolidatedLocations = {};
+
+            rawData.forEach(row => {
+                // Year Constraints Filter Logic
+                if (activeYear !== 'All' && row.year !== parseInt(activeYear)) return;
+
+                // Region Constraints Filter Logic
+                if (activeRegion === 'India' && row.country !== 'India') return;
+                if (activeRegion === 'USA' && row.country !== 'USA') return;
+                if (activeRegion === 'Europe & AUS') {
+                    const euroAusList = ['UK', 'Australia', 'Romania', 'Netherlands', 'Sweden', 'Spain'];
+                    if (!euroAusList.includes(row.country)) return;
+                }
+
+                totalDeliveries++;
+                totalParticipants += row.trainees;
+                countriesSet.add(row.country);
+                citiesSet.add(row.city);
+
+                // Group multi-year and multi-company data directly to single geo coordinates
+                const mapKey = `${row.lat}_${row.lng}`;
+                if (!consolidatedLocations[mapKey]) {
+                    consolidatedLocations[mapKey] = {
+                        city: row.city,
+                        country: row.country,
+                        region: row.region,
+                        lat: row.lat,
+                        lng: row.lng,
+                        trainees: 0,
+                        deliveries: 0,
+                        companies: new Set(),
+                        years: new Set()
+                    };
+                }
+
+                consolidatedLocations[mapKey].trainees += row.trainees;
+                consolidatedLocations[mapKey].deliveries += 1;
+                consolidatedLocations[mapKey].companies.add(row.company);
+                consolidatedLocations[mapKey].years.add(row.year);
+            });
+
+            // Update Panel Hero Text metrics counters
+            document.getElementById('count-deliveries').innerText = totalDeliveries;
+            document.getElementById('count-participants').innerText = totalParticipants;
+            document.getElementById('count-cities').innerText = citiesSet.size;
+            document.getElementById('count-countries').innerText = countriesSet.size;
+
+            // Paint Circle Markers on the canvas Layout
+            Object.values(consolidatedLocations).forEach(loc => {
+                // Dynamic sizing algorithm based on attendee counts
+                const bubbleRadius = Math.max(6, Math.sqrt(loc.trainees) * 2.8);
+
+                const marker = L.circleMarker([loc.lat, loc.lng], {
+                    radius: bubbleRadius,
+                    fillColor: '#f59e0b',
+                    color: '#fbbf24',
+                    weight: 1,
+                    opacity: 0.8,
+                    fillOpacity: 0.45
+                });
+
+                // Generate clean tooltip popups structural code
+                const sortedCompanies = Array.from(loc.companies).sort().join(', ');
+                const sortedYears = Array.from(loc.years).sort().join(', ');
+
+                const popupContent = `
+                    <div class="popup-title">${loc.city}, ${loc.country}</div>
+                    <div class="popup-row"><span class="popup-label">Deliveries:</span> ${loc.deliveries}</div>
+                    <div class="popup-row"><span class="popup-label">Participants:</span> ${loc.trainees}</div>
+                    <div class="popup-row"><span class="popup-label">Years Active:</span> ${sortedYears}</div>
+                    <div class="popup-row" style="margin-top:0.4rem; border-top:1px solid #1e293b; padding-top:0.4rem;">
+                        <span class="popup-label">Companies:</span> <span style="color:#d1d5db;">${sortedCompanies}</span>
+                    </div>
+                `;
+
+                marker.bindPopup(popupContent, { maxWidth: 280 });
+                
+                // Interactive hover styles
+                marker.on('mouseover', function(e) {
+                    this.setStyle({ fillOpacity: 0.75, weight: 2, color: '#ffffff' });
+                });
+                marker.on('mouseout', function(e) {
+                    this.setStyle({ fillOpacity: 0.45, weight: 1, color: '#fbbf24' });
+                });
+
+                markersGroup.addLayer(marker);
+            });
+        }
+
+        // Viewport Focusing Targets Logic
+        function adjustMapFocus() {
+            if (activeRegion === 'India') {
+                map.setView([21.7679, 78.8718], 5);
+            } else if (activeRegion === 'USA') {
+                map.setView([37.0902, -95.7129], 4);
+            } else if (activeRegion === 'Europe & AUS') {
+                map.setView([25.0, 45.0], 3); // Global strategic split layout focus point
+            } else {
+                map.setView([20, 10], 2);
+            }
+        }
+
+        function setYear(year) {
+            activeYear = year;
+            document.querySelectorAll('.timeline-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if(btn.innerText === year || (year === 'All' && btn.innerText === 'All Years')) {
+                    btn.classList.add('active');
+                }
+            });
+            renderDashboard();
+        }
+
+        function setRegion(region) {
+            activeRegion = region;
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if(btn.innerText.includes(region)) {
+                    btn.classList.add('active');
+                }
+            });
+            renderDashboard();
+            adjustMapFocus();
+        }
+
+        // Execute initialization context routines on frame load
+        window.onload = initMap;
+    </script>
+</body>
+</html>
