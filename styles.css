@@ -309,7 +309,7 @@ body {
 
 /* KPI Sections */
 .kpi-section {
-    padding: 2rem 0;
+    padding: 1.5rem 0 2.5rem;
     border-bottom: 1px solid var(--border-color);
 }
 
