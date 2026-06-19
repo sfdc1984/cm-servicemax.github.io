@@ -1016,7 +1016,7 @@ body {
 /* Future Vision / Roadmap Explorer */
 .roadmap-section {
     position: relative;
-    padding: 2rem 0 2rem;
+    padding: 3rem 0 2rem;
     border-bottom: 1px solid var(--border-color);
 }
 
