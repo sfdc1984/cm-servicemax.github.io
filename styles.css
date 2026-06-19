@@ -175,9 +175,9 @@ body {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    background: var(--bg-card);
-    border: 1px solid var(--border-color);
-    color: #ffffff;
+    background: rgba(37, 211, 102, 0.1);
+    border: 1px solid rgba(37, 211, 102, 0.4);
+    color: #25D366;
     padding: 0.5rem 1rem;
     border-radius: 6px;
     font-size: 0.8rem;
@@ -187,8 +187,10 @@ body {
 }
 
 .nav-actions .cta-button:hover {
-    border-color: var(--accent-amber);
-    box-shadow: 0 0 15px rgba(var(--accent-amber-rgb), 0.15);
+    background: rgba(37, 211, 102, 0.18);
+    border-color: #25D366;
+    color: #ffffff;
+    box-shadow: 0 0 18px rgba(37, 211, 102, 0.25);
 }
 
 /* Dashboard Root container */
