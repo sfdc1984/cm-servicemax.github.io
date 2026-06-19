@@ -309,7 +309,7 @@ body {
 
 /* KPI Sections */
 .kpi-section {
-    padding: 1.5rem 0 2.5rem;
+    padding: 1.5rem 0 2rem;
     border-bottom: 1px solid var(--border-color);
 }
 
@@ -420,7 +420,7 @@ body {
 
 /* Map Dashboard Section */
 .map-section-wrapper {
-    padding: 3.5rem 0;
+    padding: 3.5rem 0 2rem;
     border-bottom: 1px solid var(--border-color);
 }
 
