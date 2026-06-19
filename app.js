@@ -222,11 +222,17 @@ function renderDashboard() {
         if (activeYear !== 'All' && row.year !== parseInt(activeYear)) return;
 
         // Region Filter
-        if (activeRegion === 'India' && row.country !== 'India') return;
-        if (activeRegion === 'USA' && row.country !== 'USA') return;
-        if (activeRegion === 'Europe & AUS') {
-            const euroAusList = ['UK', 'Australia', 'Romania', 'Netherlands', 'Sweden', 'Spain'];
-            if (!euroAusList.includes(row.country)) return;
+        if (activeRegion === 'APAC') {
+            const apacList = ['India', 'China', 'Malaysia', 'Singapore', 'Japan', 'South Korea', 'Thailand', 'Indonesia', 'Vietnam', 'Philippines', 'Australia', 'New Zealand'];
+            if (!apacList.includes(row.country)) return;
+        }
+        if (activeRegion === 'North America') {
+            const naList = ['USA', 'Canada', 'Mexico'];
+            if (!naList.includes(row.country)) return;
+        }
+        if (activeRegion === 'Europe') {
+            const europeList = ['UK', 'Romania', 'Netherlands', 'Sweden', 'Spain'];
+            if (!europeList.includes(row.country)) return;
         }
 
         totalDeliveries++;
@@ -403,12 +409,12 @@ function refreshLedgerList() {
 
 // Adjust viewport focus based on selected Region
 function adjustMapFocus() {
-    if (activeRegion === 'India') {
-        map.setView([21.7679, 78.8718], 5);
-    } else if (activeRegion === 'USA') {
-        map.setView([37.0902, -95.7129], 4);
-    } else if (activeRegion === 'Europe & AUS') {
-        map.setView([25.0, 45.0], 3); // Positioned globally between Europe and Australia
+    if (activeRegion === 'APAC') {
+        map.setView([20, 105], 3);
+    } else if (activeRegion === 'North America') {
+        map.setView([39.8283, -98.5795], 3);
+    } else if (activeRegion === 'Europe') {
+        map.setView([52, 15], 4);
     } else {
         map.setView([20, 10], 2);
     }
