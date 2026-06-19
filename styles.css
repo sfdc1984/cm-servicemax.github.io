@@ -250,14 +250,9 @@ body {
 }
 
 .highlight-bengaluru {
-    background: linear-gradient(
-        90deg,
-        #f59e0b 0%,
-        #fb923c 100%
-    );
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    color: #ffffff;
+    position: relative;
+    display: inline-block;
 }
 
 .highlight-bengaluru::after {
@@ -275,7 +270,6 @@ body {
     );
     box-shadow: 0 0 12px rgba(245, 158, 11, 0.35);
 }
-
 .hero-subtitle {
     font-size: clamp(1.1rem, 2vw, 1.35rem);
     color: var(--text-muted);
