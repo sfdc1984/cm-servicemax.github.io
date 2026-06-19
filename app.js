@@ -475,7 +475,7 @@ const roadmapData = {
     'best-practices': {
         title: 'ServiceMax Best Practices Library',
         tag: 'KNOWLEDGE REPOSITORY',
-        desc: 'A curated checklist of configuration guidelines for Asset 360 and SVMx Core. Covering optimal Installed Base structure design, Entitlement Verification sequences, and preventative maintenance scheduling to avoid governor limits.',
+        desc: 'A curated checklist of configuration guidelines for ServiceMax Core and ServiceMax Go app. Covering optimal Installed Base structure design, Entitlement Verification sequences, and preventative maintenance scheduling to avoid governor limits.',
         status: 'In Planning Phase',
         statusClass: 'plan',
         bullets: [
@@ -487,7 +487,7 @@ const roadmapData = {
     'timeline': {
         title: 'Interactive Engagement Timeline',
         tag: 'IMPACT PORTFOLIO',
-        desc: 'A detailed interactive chronological roadmap of key consulting engagements since 2017. Track specific project milestones, upgrades from SVMx Classic to Asset 360, and migration logs for Fortune 500 integrations.',
+        desc: 'A detailed interactive chronological roadmap of key consulting engagements since 2017. Track specific project milestones, upgrades from SVMx Classic to ServiceMax Core, and deployment logs for ServiceMax Go app integrations.',
         status: 'In Planning Phase',
         statusClass: 'plan',
         bullets: [
