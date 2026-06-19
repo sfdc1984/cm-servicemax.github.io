@@ -196,7 +196,7 @@ body {
 /* Dashboard Root container */
 .dashboard-root {
     max-width: 1400px;
-    margin: 80px auto 0 auto;
+    margin: 56px auto 0 auto;
     padding: 0 2rem;
     position: relative;
     z-index: 10;
