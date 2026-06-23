@@ -122,7 +122,7 @@ const rawData = [
   {year:2025, country:"USA", region:"New York", city:"New York", lat:40.7128, lng:-74.0060, company:"Accenture", trainees:1},
   {year:2025, country:"USA", region:"Florida", city:"Palm Beach Gardens", lat:26.8338, lng:-80.1225, company:"Carrier", trainees:3},
   {year:2025, country:"USA", region:"Massachusetts", city:"Waltham", lat:42.3765, lng:-71.2356, company:"Thermo Fisher Scientific", trainees:1},
-// ===== Portfolio Expansion Dataset =====
+//Portfolio Expansion Dataset
 {year:2023, country:"Malaysia", region:"Selangor", city:"Kuala Lumpur", lat:3.1390, lng:101.6869, company:"Alcon Malaysia", trainees:4},
 {year:2024, country:"Saudi Arabia", region:"Eastern Province", city:"Dammam", lat:26.4207, lng:50.0888, company:"AFMS", trainees:3},
 {year:2024, country:"Belgium", region:"Flanders", city:"Antwerp", lat:51.2194, lng:4.4025, company:"Vincotte", trainees:2},
