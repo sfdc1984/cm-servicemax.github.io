@@ -121,44 +121,25 @@ const rawData = [
   {year:2025, country:"USA", region:"Wisconsin", city:"Milwaukee", lat:43.0389, lng:-87.9065, company:"Johnson Controls", trainees:1},
   {year:2025, country:"USA", region:"New York", city:"New York", lat:40.7128, lng:-74.0060, company:"Accenture", trainees:1},
   {year:2025, country:"USA", region:"Florida", city:"Palm Beach Gardens", lat:26.8338, lng:-80.1225, company:"Carrier", trainees:3},
-  {year:2025, country:"USA", region:"Massachusetts", city:"Waltham", lat:42.3765, lng:-71.2356, company:"Thermo Fisher Scientific", trainees:1}
+  {year:2025, country:"USA", region:"Massachusetts", city:"Waltham", lat:42.3765, lng:-71.2356, company:"Thermo Fisher Scientific", trainees:1},
 // ===== Portfolio Expansion Dataset =====
-
 {year:2023, country:"Malaysia", region:"Selangor", city:"Kuala Lumpur", lat:3.1390, lng:101.6869, company:"Alcon Malaysia", trainees:4},
-
 {year:2024, country:"Saudi Arabia", region:"Eastern Province", city:"Dammam", lat:26.4207, lng:50.0888, company:"AFMS", trainees:3},
-
 {year:2024, country:"Belgium", region:"Flanders", city:"Antwerp", lat:51.2194, lng:4.4025, company:"Vincotte", trainees:2},
-
 {year:2024, country:"Poland", region:"Masovian", city:"Warsaw", lat:52.2297, lng:21.0122, company:"Craftware", trainees:3},
-
 {year:2025, country:"Japan", region:"Tokyo", city:"Tokyo", lat:35.6762, lng:139.6503, company:"Sony", trainees:2},
-
 {year:2024, country:"Japan", region:"Tokyo", city:"Tokyo", lat:35.6762, lng:139.6503, company:"Topcon", trainees:2},
-
 {year:2022, country:"Japan", region:"Tokyo", city:"Tokyo", lat:35.6762, lng:139.6503, company:"Horiba", trainees:2},
-
 {year:2024, country:"USA", region:"Texas", city:"Houston", lat:29.7604, lng:-95.3698, company:"Baker Hughes", trainees:3},
-
 {year:2023, country:"USA", region:"New York", city:"Rochester", lat:43.1566, lng:-77.6088, company:"Kodak", trainees:2},
-
 {year:2024, country:"USA", region:"Texas", city:"Austin", lat:30.2672, lng:-97.7431, company:"Luminex", trainees:2},
-
 {year:2025, country:"USA", region:"Ohio", city:"Newbury", lat:41.4620, lng:-81.2034, company:"Kinetico", trainees:2},
-
 {year:2024, country:"USA", region:"New York", city:"Rye Brook", lat:41.0018, lng:-73.6846, company:"Xylem", trainees:2},
-
 {year:2022, country:"Netherlands", region:"Overijssel", city:"Almelo", lat:52.3567, lng:6.6625, company:"Malvern Panalytical", trainees:2},
-
 {year:2025, country:"Sweden", region:"Stockholm", city:"Stockholm", lat:59.3293, lng:18.0686, company:"Elekta", trainees:2},
-
 {year:2024, country:"Iceland", region:"Capital Region", city:"Reykjavik", lat:64.1466, lng:-21.9426, company:"Marel", trainees:2},
-
 {year:2024, country:"USA", region:"North Carolina", city:"Charlotte", lat:35.2271, lng:-80.8431, company:"LiftOne", trainees:2},
-
 {year:2024, country:"USA", region:"Michigan", city:"Brighton", lat:42.5295, lng:-83.7802, company:"Lowry Solutions", trainees:2}
-
-
 ];
 
 // Application State Management
