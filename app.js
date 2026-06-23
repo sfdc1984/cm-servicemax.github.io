@@ -52,7 +52,6 @@ const rawData = [
   {year:2022, country:"UK", region:"London", city:"London", lat:51.5287, lng:-0.3241, company:"LivaNova", trainees:1},
   {year:2022, country:"UK", region:"London", city:"London", lat:51.5287, lng:-0.3241, company:"Molecular Devices", trainees:1},
   {year:2022, country:"USA", region:"Maryland", city:"Baltimore", lat:39.2848, lng:-76.7029, company:"ServiceMax", trainees:1},
-  {year:2022, country:"USA", region:"Illinois", city:"Chicago", lat:41.8781, lng:-87.6298, company:"MetraRR", trainees:1},
   {year:2022, country:"USA", region:"Florida", city:"Clearwater", lat:27.9926, lng:-82.8038, company:"Philips", trainees:1},
   {year:2022, country:"USA", region:"Texas", city:"Houston", lat:29.7604, lng:-95.3698, company:"ServiceMax", trainees:7},
   {year:2022, country:"USA", region:"Nevada", city:"Las Vegas", lat:36.1699, lng:-115.1398, company:"Everi", trainees:1},
